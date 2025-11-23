@@ -12,15 +12,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if API key exists
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.error('RESEND_API_KEY is not set');
+      return NextResponse.json(
+        { error: 'Email service not configured' },
+        { status: 500 }
+      );
+    }
+
     // Send email via Resend
+    console.log('Sending email to:', email);
+    console.log('Using API key:', apiKey.substring(0, 10) + '...');
+
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: 'Aedura <onboarding@resend.dev>', // Change this after verifying domain
+        from: 'Aedura <onboarding@resend.dev>',
         to: email,
         subject: '🎓 Welcome to Aedura - You\'re on the Waitlist!',
         html: `
@@ -58,11 +71,26 @@ export async function POST(request: NextRequest) {
       }),
     });
 
+    const responseText = await response.text();
+    console.log('Resend response status:', response.status);
+    console.log('Resend response body:', responseText);
+
     if (!response.ok) {
-      const error = await response.json();
-      console.error('Resend error:', error);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Resend API error:', response.status, errorData);
+      
+      // Check if it's a domain verification error
+      if (response.status === 403 && errorData.message?.includes('verify a domain')) {
+        return NextResponse.json(
+          { 
+            error: 'Email domain not verified. Please verify your domain at resend.com/domains first.' 
+          },
+          { status: 403 }
+        );
+      }
+      
       return NextResponse.json(
-        { error: 'Failed to send email' },
+        { error: 'Failed to send email. Please try again later.' },
         { status: 500 }
       );
     }
@@ -77,7 +105,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('API error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error. Please try again.' },
       { status: 500 }
     );
   }
