@@ -1,7 +1,7 @@
 "use client"
 
 import Navbar from "@/components/Navbar";
-import { ArrowUpRight, Github, Mail } from "lucide-react";
+import { ArrowUpRight, Github, Loader2, Mail } from "lucide-react";
 import React, { useState } from "react";
 
 interface EmailFormProps {
@@ -131,6 +131,334 @@ function CountdownTimer() {
     </div>
   );
 }
+
+const ContributorCard = () => {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch("/api/contribute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email })
+      });
+
+      const data: { error?: string } = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        setMessage({ type: "success", text: "Thanks for reaching out! We'll connect with you soon." });
+        setName("");
+        setEmail("");
+      } else {
+        setMessage({ type: "error", text: data.error || "Something went wrong. Please try again." });
+      }
+    } catch {
+      setMessage({ type: "error", text: "Unable to submit right now. Please try again." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    setIsFormOpen(false);
+    setMessage(null);
+  };
+
+  return (
+    <div className="group relative">
+      <div
+        className={`absolute -inset-0.5 bg-linear-to-r from-blue-600/40 to-cyan-600/40 rounded-2xl blur transition duration-500 ${
+          isFormOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+        }`}
+      ></div>
+      <div
+        className={`relative p-8 sm:p-10 bg-black border rounded-2xl flex flex-col h-full transition-all duration-300 ${
+          isFormOpen ? "border-blue-500/50" : "border-gray-800 group-hover:border-blue-500/50"
+        }`}
+      >
+        {!isFormOpen && <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl"></div>}
+        <div className="relative z-10 flex flex-col h-full">
+          <div className="flex items-center gap-4 mb-6">
+            <div
+              className={`w-14 h-14 bg-linear-to-br from-blue-500/20 to-cyan-500/10 rounded-xl flex items-center justify-center transition-transform duration-300 ${
+                isFormOpen ? "" : "group-hover:scale-110"
+              }`}
+            >
+              <Github className="w-7 h-7 text-blue-400" />
+            </div>
+            <h3 className="font-bold text-xl text-white">Become a Contributor</h3>
+          </div>
+
+          {isFormOpen ? (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-6 grow">
+              <p className="text-gray-400 leading-relaxed">
+                Share your details and we&apos;ll send the onboarding kit for contributors.
+              </p>
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="contributor-name" className="text-sm font-medium text-gray-300">
+                    Full name
+                  </label>
+                  <input
+                    id="contributor-name"
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
+                    placeholder="Jane Doe"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="contributor-email" className="text-sm font-medium text-gray-300">
+                    Work email
+                  </label>
+                  <input
+                    id="contributor-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
+                    placeholder="you@school.edu"
+                  />
+                </div>
+              </div>
+              {message && (
+                <p className={`text-sm ${message.type === "success" ? "text-green-400" : "text-red-400"}`}>
+                  {message.text}
+                </p>
+              )}
+              <div className="flex flex-wrap gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Submit"
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="px-5 py-3 bg-gray-800 text-gray-300 font-medium rounded-lg hover:bg-gray-700 transition"
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <p className="text-gray-400 leading-relaxed mb-8 grow">
+                Help us build the future of education. Contribute code, ideas, or content to Aedura.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsFormOpen(true);
+                  setMessage(null);
+                }}
+                className="flex items-center gap-2 text-blue-400 font-semibold group-hover:text-blue-300 transition-colors"
+              >
+                Get in touch
+                <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AdvisoryBoardCard = () => {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [expertise, setExpertise] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch("/api/advboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, expertise })
+      });
+
+      const data: { error?: string } = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        setMessage({ type: "success", text: "Thanks for your interest! We'll be in touch with next steps." });
+        setName("");
+        setEmail("");
+        setExpertise("");
+      } else {
+        setMessage({ type: "error", text: data.error || "Something went wrong. Please try again." });
+      }
+    } catch {
+      setMessage({ type: "error", text: "Unable to submit right now. Please try again." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    setIsFormOpen(false);
+    setMessage(null);
+  };
+
+  return (
+    <div className="group relative">
+      <div
+        className={`absolute -inset-1 bg-linear-to-r from-purple-600 via-pink-600 to-purple-600 rounded-2xl blur transition duration-500 ${
+          isFormOpen ? "opacity-100" : "opacity-30 group-hover:opacity-100"
+        }`}
+      ></div>
+      <div
+        className={`relative p-8 sm:p-10 bg-linear-to-br from-purple-950/40 to-black border rounded-2xl flex flex-col h-full transition-all duration-300 shadow-2xl shadow-purple-500/10 ${
+          isFormOpen ? "border-purple-400" : "border-purple-500/50 group-hover:border-purple-400 group-hover:shadow-purple-500/30"
+        }`}
+      >
+        <div className="absolute -top-1 -right-1 px-4 py-1 bg-linear-to-r from-purple-500 to-pink-500 rounded-full text-xs font-bold text-white">
+          FEATURED
+        </div>
+        {!isFormOpen && (
+          <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-all duration-300"></div>
+        )}
+        <div className="relative z-10 flex flex-col h-full">
+          <div className="flex items-center gap-4 mb-6 mt-4">
+            <div
+              className={`w-14 h-14 bg-linear-to-br from-purple-500/30 to-pink-500/20 rounded-xl flex items-center justify-center transition-transform duration-300 ${
+                isFormOpen ? "" : "group-hover:scale-110"
+              }`}
+            >
+              <Mail className="w-7 h-7 text-purple-300" />
+            </div>
+            <h3 className="font-bold text-xl text-white">Join Advisory Board</h3>
+          </div>
+
+          {isFormOpen ? (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-6 grow">
+              <p className="text-gray-300 leading-relaxed">
+                Tell us a little about your background so we can schedule an introductory conversation.
+              </p>
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="advisory-name" className="text-sm font-medium text-purple-200">
+                    Full name
+                  </label>
+                  <input
+                    id="advisory-name"
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    className="w-full px-4 py-3 bg-purple-950/20 border border-purple-500/40 rounded-lg text-white placeholder-purple-300/60 focus:outline-none focus:border-purple-300 transition"
+                    placeholder="Taylor Morgan"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="advisory-email" className="text-sm font-medium text-purple-200">
+                    Email
+                  </label>
+                  <input
+                    id="advisory-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    className="w-full px-4 py-3 bg-purple-950/20 border border-purple-500/40 rounded-lg text-white placeholder-purple-300/60 focus:outline-none focus:border-purple-300 transition"
+                    placeholder="you@organization.com"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="advisory-expertise" className="text-sm font-medium text-purple-200">
+                    Area of expertise
+                  </label>
+                  <textarea
+                    id="advisory-expertise"
+                    required
+                    value={expertise}
+                    onChange={(event) => setExpertise(event.target.value)}
+                    className="w-full px-4 py-3 bg-purple-950/20 border border-purple-500/40 rounded-lg text-white placeholder-purple-300/60 focus:outline-none focus:border-purple-300 transition h-28 resize-none"
+                    placeholder="Leadership roles, domains, or initiatives you've championed"
+                  ></textarea>
+                </div>
+              </div>
+              {message && (
+                <p className={`text-sm ${message.type === "success" ? "text-green-400" : "text-red-400"}`}>
+                  {message.text}
+                </p>
+              )}
+              <div className="flex flex-wrap gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-purple-500 text-white font-semibold rounded-lg hover:bg-purple-400 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Submit"
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="px-5 py-3 bg-black/40 text-purple-200 font-medium rounded-lg hover:bg-black/60 transition"
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <p className="text-gray-300 leading-relaxed mb-8 grow">
+                Shape our vision and strategy. We&apos;re looking for experienced education leaders to guide our mission.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsFormOpen(true);
+                  setMessage(null);
+                }}
+                className="flex items-center gap-2 text-purple-300 font-semibold group-hover:text-purple-200 transition-colors"
+              >
+                Get in touch
+                <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function Home() {
   return (
@@ -489,60 +817,8 @@ export default function Home() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
-              {/* Contributor Card */}
-              <div className="group relative">
-                <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600/40 to-cyan-600/40 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                <a 
-                  href="mailto:contributors@aedura.com"
-                  className="relative p-8 sm:p-10 bg-black border border-gray-800 group-hover:border-blue-500/50 rounded-2xl transition-all duration-300 flex flex-col h-full"
-                >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl"></div>
-                  <div className="relative z-10 flex flex-col h-full">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-14 h-14 bg-linear-to-br from-blue-500/20 to-cyan-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <Github className="w-7 h-7 text-blue-400" />
-                      </div>
-                      <h3 className="font-bold text-xl text-white">Become a Contributor</h3>
-                    </div>
-                    <p className="text-gray-400 leading-relaxed mb-8 grow">
-                      Help us build the future of education. Contribute code, ideas, or content to Aedura.
-                    </p>
-                    <div className="flex items-center gap-2 text-blue-400 font-semibold group-hover:text-blue-300 transition-colors">
-                      Get in touch
-                      <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
-                    </div>
-                  </div>
-                </a>
-              </div>
-
-              {/* Advisory Board Card - Premium */}
-              <div className="group relative">
-                <div className="absolute -inset-1 bg-linear-to-r from-purple-600 via-pink-600 to-purple-600 rounded-2xl blur opacity-30 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
-                <a 
-                  href="mailto:advisory@aedura.com"
-                  className="relative p-8 sm:p-10 bg-linear-to-br from-purple-950/40 to-black border border-purple-500/50 group-hover:border-purple-400 rounded-2xl transition-all duration-300 flex flex-col h-full shadow-2xl shadow-purple-500/10 group-hover:shadow-purple-500/30"
-                >
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-all duration-300"></div>
-                  <div className="absolute -top-1 -right-1 px-4 py-1 bg-linear-to-r from-purple-500 to-pink-500 rounded-full text-xs font-bold text-white">
-                    FEATURED
-                  </div>
-                  <div className="relative z-10 flex flex-col h-full">
-                    <div className="flex items-center gap-4 mb-6 mt-4">
-                      <div className="w-14 h-14 bg-linear-to-br from-purple-500/30 to-pink-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <Mail className="w-7 h-7 text-purple-300" />
-                      </div>
-                      <h3 className="font-bold text-xl text-white">Join Advisory Board</h3>
-                    </div>
-                    <p className="text-gray-300 leading-relaxed mb-8 grow">
-                      Shape our vision and strategy. We&apos;re looking for experienced education leaders to guide our mission.
-                    </p>
-                    <div className="flex items-center gap-2 text-purple-300 font-semibold group-hover:text-purple-200 transition-colors">
-                      Get in touch
-                      <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
-                    </div>
-                  </div>
-                </a>
-              </div>
+              <ContributorCard />
+              <AdvisoryBoardCard />
             </div>
           </div>
         </section>

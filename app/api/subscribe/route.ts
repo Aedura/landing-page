@@ -1,13 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { connectDB } from "@/lib/connector";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json();
 
     // Validate email
-    if (!email || !email.includes('@')) {
+    if (!email || !email.includes("@")) {
       return NextResponse.json(
-        { error: 'Invalid email address' },
+        { error: "Invalid email address" },
         { status: 400 }
       );
     }
@@ -15,27 +16,27 @@ export async function POST(request: NextRequest) {
     // Check if API key exists
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
-      console.error('RESEND_API_KEY is not set');
+      console.error("RESEND_API_KEY is not set");
       return NextResponse.json(
-        { error: 'Email service not configured' },
+        { error: "Email service not configured" },
         { status: 500 }
       );
     }
 
     // Send email via Resend
-    console.log('Sending email to:', email);
-    console.log('Using API key:', apiKey.substring(0, 10) + '...');
+    console.log("Sending email to:", email);
+    console.log("Using API key:", apiKey.substring(0, 10) + "...");
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: 'Aedura <onboarding@resend.dev>',
+        from: "Aedura <onboarding@resend.dev>",
         to: email,
-        subject: '🎓 Welcome to Aedura - You\'re on the Waitlist!',
+        subject: "🎓 Welcome to Aedura - You're on the Waitlist!",
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h1 style="color: #000; margin-bottom: 16px;">🎓 Welcome to Aedura!</h1>
@@ -72,40 +73,50 @@ export async function POST(request: NextRequest) {
     });
 
     const responseText = await response.text();
-    console.log('Resend response status:', response.status);
-    console.log('Resend response body:', responseText);
+    console.log("Resend response status:", response.status);
+    console.log("Resend response body:", responseText);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('Resend API error:', response.status, errorData);
-      
+      console.error("Resend API error:", response.status, errorData);
+
       // Check if it's a domain verification error
-      if (response.status === 403 && errorData.message?.includes('verify a domain')) {
+      if (
+        response.status === 403 &&
+        errorData.message?.includes("verify a domain")
+      ) {
         return NextResponse.json(
-          { 
-            error: 'Email domain not verified. Please verify your domain at resend.com/domains first.' 
+          {
+            error:
+              "Email domain not verified. Please verify your domain at resend.com/domains first.",
           },
           { status: 403 }
         );
       }
-      
+
       return NextResponse.json(
-        { error: 'Failed to send email. Please try again later.' },
+        { error: "Failed to send email. Please try again later." },
         { status: 500 }
       );
     }
 
-    // Optionally: Save email to database (implement later)
-    // await db.subscribers.create({ email });
+    // Save email to database
+    await connectDB();
+    const sub = await import("@/models/sub").then((mod) => mod.default);
+    const newSub = new sub({ email });
+    await newSub.save();
+    console.log("Saved subscriber to DB:", newSub);
 
     return NextResponse.json(
-      { message: 'Successfully subscribed! Check your email for confirmation.' },
+      {
+        message: "Successfully subscribed! Check your email for confirmation.",
+      },
       { status: 200 }
     );
   } catch (error) {
-    console.error('API error:', error);
+    console.error("API error:", error);
     return NextResponse.json(
-      { error: 'Internal server error. Please try again.' },
+      { error: "Internal server error. Please try again." },
       { status: 500 }
     );
   }
