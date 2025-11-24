@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Syne, Inter } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next"
 
 const syne = Syne({
   variable: "--font-syne",
@@ -28,6 +29,7 @@ export default function RootLayout({
         className={`${syne.variable} ${inter.variable} antialiased`}
       >
         {children}
+        <Analytics />
       </body>
     </html>
   );
