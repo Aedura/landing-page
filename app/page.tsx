@@ -134,6 +134,7 @@ function CountdownTimer() {
 
 const ContributorCard = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -167,9 +168,19 @@ const ContributorCard = () => {
     }
   };
 
-  const handleClose = () => {
-    setIsFormOpen(false);
+  const handleOpenForm = () => {
+    setIsAnimating(true);
+    setIsFormOpen(true);
     setMessage(null);
+  };
+
+  const handleClose = () => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      setIsFormOpen(false);
+      setIsAnimating(false);
+      setMessage(null);
+    }, 400);
   };
 
   return (
@@ -182,7 +193,7 @@ const ContributorCard = () => {
       <div
         className={`relative p-8 sm:p-10 bg-black border rounded-2xl flex flex-col h-full transition-all duration-300 ${
           isFormOpen ? "border-blue-500/50" : "border-gray-800 group-hover:border-blue-500/50"
-        }`}
+        } ${isAnimating && isFormOpen ? "card-opening" : isAnimating && !isFormOpen ? "card-closing" : ""} ${isFormOpen ? "overflow-hidden" : ""}`}
       >
         {!isFormOpen && <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl"></div>}
         <div className="relative z-10 flex flex-col h-full">
@@ -198,7 +209,7 @@ const ContributorCard = () => {
           </div>
 
           {isFormOpen ? (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6 grow">
+            <form onSubmit={handleSubmit} className={`flex flex-col gap-6 grow ${isAnimating && isFormOpen ? "content-opening" : isAnimating && !isFormOpen ? "content-closing" : ""}`}>
               <p className="text-gray-400 leading-relaxed">
                 Share your details and we&apos;ll send the onboarding kit for contributors.
               </p>
@@ -269,10 +280,7 @@ const ContributorCard = () => {
               </p>
               <button
                 type="button"
-                onClick={() => {
-                  setIsFormOpen(true);
-                  setMessage(null);
-                }}
+                onClick={handleOpenForm}
                 className="flex items-center gap-2 text-blue-400 font-semibold group-hover:text-blue-300 transition-colors"
               >
                 Get in touch
@@ -288,6 +296,7 @@ const ContributorCard = () => {
 
 const AdvisoryBoardCard = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [expertise, setExpertise] = useState("");
@@ -323,9 +332,19 @@ const AdvisoryBoardCard = () => {
     }
   };
 
-  const handleClose = () => {
-    setIsFormOpen(false);
+  const handleOpenForm = () => {
+    setIsAnimating(true);
+    setIsFormOpen(true);
     setMessage(null);
+  };
+
+  const handleClose = () => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      setIsFormOpen(false);
+      setIsAnimating(false);
+      setMessage(null);
+    }, 400);
   };
 
   return (
@@ -338,7 +357,7 @@ const AdvisoryBoardCard = () => {
       <div
         className={`relative p-8 sm:p-10 bg-linear-to-br from-purple-950/40 to-black border rounded-2xl flex flex-col h-full transition-all duration-300 shadow-2xl shadow-purple-500/10 ${
           isFormOpen ? "border-purple-400" : "border-purple-500/50 group-hover:border-purple-400 group-hover:shadow-purple-500/30"
-        }`}
+        } ${isAnimating && isFormOpen ? "card-opening" : isAnimating && !isFormOpen ? "card-closing" : ""} ${isFormOpen ? "overflow-hidden" : ""}`}
       >
         <div className="absolute -top-1 -right-1 px-4 py-1 bg-linear-to-r from-purple-500 to-pink-500 rounded-full text-xs font-bold text-white">
           FEATURED
@@ -359,7 +378,7 @@ const AdvisoryBoardCard = () => {
           </div>
 
           {isFormOpen ? (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6 grow">
+            <form onSubmit={handleSubmit} className={`flex flex-col gap-6 grow ${isAnimating && isFormOpen ? "content-opening" : isAnimating && !isFormOpen ? "content-closing" : ""}`}>
               <p className="text-gray-300 leading-relaxed">
                 Tell us a little about your background so we can schedule an introductory conversation.
               </p>
@@ -443,10 +462,7 @@ const AdvisoryBoardCard = () => {
               </p>
               <button
                 type="button"
-                onClick={() => {
-                  setIsFormOpen(true);
-                  setMessage(null);
-                }}
+                onClick={handleOpenForm}
                 className="flex items-center gap-2 text-purple-300 font-semibold group-hover:text-purple-200 transition-colors"
               >
                 Get in touch
