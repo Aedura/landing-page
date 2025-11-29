@@ -7,19 +7,27 @@ import Navbar from "../../components/Navbar";
  * - Combined Signup + Login glassmorphic UI
  * - Accessible tab + segmented control
  * - Client-side validation with inline errors
+ * - Role-specific forms for Contributors and Advisory Board
  * - Minimal, self-contained (frontend only)
  * NOTE: Backend must hash passwords; never log raw passwords here.
  */
 
 type Mode = "signup" | "login";
-type SubRole = "advisory" | "contributor";
+type RoleType = "advisory" | "contributor";
 
 interface FieldErrors {
   name?: string;
   email?: string;
   password?: string;
-  role?: string;
-  expertise?: string;
+  contributorRole?: string;
+  contributorRoleOther?: string;
+  contributorExperience?: string;
+  contributorTechnique?: string;
+  contributorTechniqueOther?: string;
+  advisoryPositionTitle?: string;
+  advisoryExperience?: string;
+  advisoryDomain?: string;
+  advisoryFeatures?: string;
 }
 
 const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
@@ -39,16 +47,38 @@ function validatePassword(v: string) {
   if (!passwordStrengthRegex.test(v))
     return "Min 8 chars incl. uppercase, lowercase, and number.";
 }
-function validateRole(v: string) {
-  if (!v) return "Role is required.";
+function validateContributorRole(v: string) {
+  if (!v) return "Select a contributor role.";
 }
-function validateExpertise(v: string, role: string) {
-  if (role === "Advisor") {
-    if (!v.trim()) return "Expertise is required for Advisors.";
-    if (v.trim().length < 20)
-      return "Provide at least 20 characters describing expertise.";
-  }
-  // Contributor: optional (no error)
+function validateContributorRoleOther(v: string, role: string) {
+  if (role === "other" && !v.trim())
+    return "Describe your contributor role.";
+}
+function validateContributorExperience(v: string) {
+  if (!v.trim()) return "Share a bit about your experience.";
+  if (v.trim().length < 20)
+    return "Please provide at least 20 characters.";
+}
+function validateContributorTechnique(v: string) {
+  if (!v) return "Select a preferred technique.";
+}
+function validateContributorTechniqueOther(v: string, technique: string) {
+  if (technique === "other" && !v.trim())
+    return "Describe the technique you use.";
+}
+function validateAdvisoryPositionTitle(v: string) {
+  if (!v.trim()) return "Position title is required.";
+}
+function validateAdvisoryExperience(v: string) {
+  if (!v.trim()) return "Experience detail is required.";
+}
+function validateAdvisoryDomain(v: string) {
+  if (!v.trim()) return "Domain is required.";
+}
+function validateAdvisoryFeatures(v: string) {
+  if (!v.trim()) return "Please share the features you expect.";
+  if (v.trim().length < 20)
+    return "Provide at least 20 characters so we can learn more.";
 }
 
 /* Simple spinner (respects reduced motion preference by fallback static icon) */
@@ -64,18 +94,27 @@ const Spinner: React.FC<{ reduceMotion: boolean }> = ({ reduceMotion }) => (
 
 export default function Page() {
   const [mode, setMode] = useState<Mode>("signup");
-  const [subRole, setSubRole] = useState<SubRole>("advisory");
+  const [subRole, setSubRole] = useState<RoleType>("advisory");
   const [reduceMotion, setReduceMotion] = useState(false);
 
   // Form state
-  const [values, setValues] = useState({
+  const defaultValues = {
     name: "",
     email: "",
     password: "",
-    role: "Advisor", // default aligns with subRole 'advisory'
-    expertise: "",
     remember: false,
-  });
+    contributorRole: "",
+    contributorRoleOther: "",
+    contributorExperience: "",
+    contributorTechnique: "",
+    contributorTechniqueOther: "",
+    advisoryPositionTitle: "",
+    advisoryExperience: "",
+    advisoryDomain: "",
+    advisoryFeatures: "",
+  };
+  type ValueKey = keyof typeof defaultValues;
+  const [values, setValues] = useState(defaultValues);
 
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -83,14 +122,6 @@ export default function Page() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
-
-  // Sync role dropdown when subRole changes IF user has not manually changed role away
-  useEffect(() => {
-    setValues((prev) => ({
-      ...prev,
-      role: subRole === "advisory" ? "Advisor" : "Contributor",
-    }));
-  }, [subRole]);
 
   // Prefers-reduced-motion detection
   useEffect(() => {
@@ -106,24 +137,78 @@ export default function Page() {
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) => {
-    const { name, value, type, checked } = e.target;
+    const target = e.target as
+      | HTMLInputElement
+      | HTMLSelectElement
+      | HTMLTextAreaElement;
+    const { name, value, type } = target;
+    const checked = (target as HTMLInputElement).checked;
     setValues((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
+  useEffect(() => {
+    if (mode !== "signup") return;
+    setErrors((prev) => {
+      const next = { ...prev };
+      if (subRole === "contributor") {
+        delete next.advisoryPositionTitle;
+        delete next.advisoryExperience;
+        delete next.advisoryDomain;
+        delete next.advisoryFeatures;
+      } else {
+        delete next.contributorRole;
+        delete next.contributorRoleOther;
+        delete next.contributorExperience;
+        delete next.contributorTechnique;
+        delete next.contributorTechniqueOther;
+      }
+      return next;
+    });
+  }, [subRole, mode]);
+
   // Validate a single field onBlur for accessible inline feedback
   const validateField = useCallback(
-    (field: keyof typeof values) => {
+    (field: ValueKey) => {
       let err: string | undefined;
       if (mode === "signup") {
         if (field === "name") err = validateName(values.name);
         if (field === "email") err = validateEmail(values.email);
         if (field === "password") err = validatePassword(values.password);
-        if (field === "role") err = validateRole(values.role);
-        if (field === "expertise")
-          err = validateExpertise(values.expertise, values.role);
+
+        if (subRole === "contributor") {
+          if (field === "contributorRole")
+            err = validateContributorRole(values.contributorRole);
+          if (field === "contributorRoleOther")
+            err = validateContributorRoleOther(
+              values.contributorRoleOther,
+              values.contributorRole,
+            );
+          if (field === "contributorExperience")
+            err = validateContributorExperience(values.contributorExperience);
+          if (field === "contributorTechnique")
+            err = validateContributorTechnique(values.contributorTechnique);
+          if (field === "contributorTechniqueOther")
+            err = validateContributorTechniqueOther(
+              values.contributorTechniqueOther,
+              values.contributorTechnique,
+            );
+        }
+
+        if (subRole === "advisory") {
+          if (field === "advisoryPositionTitle")
+            err = validateAdvisoryPositionTitle(
+              values.advisoryPositionTitle,
+            );
+          if (field === "advisoryExperience")
+            err = validateAdvisoryExperience(values.advisoryExperience);
+          if (field === "advisoryDomain")
+            err = validateAdvisoryDomain(values.advisoryDomain);
+          if (field === "advisoryFeatures")
+            err = validateAdvisoryFeatures(values.advisoryFeatures);
+        }
       } else {
         // login mode
         if (field === "email") err = validateEmail(values.email);
@@ -131,7 +216,7 @@ export default function Page() {
       }
       setErrors((prev) => ({ ...prev, [field]: err }));
     },
-    [values, mode],
+    [values, mode, subRole],
   );
 
   const runFullValidation = () => {
@@ -140,8 +225,35 @@ export default function Page() {
       next.name = validateName(values.name);
       next.email = validateEmail(values.email);
       next.password = validatePassword(values.password);
-      next.role = validateRole(values.role);
-      next.expertise = validateExpertise(values.expertise, values.role);
+
+      if (subRole === "contributor") {
+        next.contributorRole = validateContributorRole(values.contributorRole);
+        next.contributorRoleOther = validateContributorRoleOther(
+          values.contributorRoleOther,
+          values.contributorRole,
+        );
+        next.contributorExperience = validateContributorExperience(
+          values.contributorExperience,
+        );
+        next.contributorTechnique = validateContributorTechnique(
+          values.contributorTechnique,
+        );
+        next.contributorTechniqueOther = validateContributorTechniqueOther(
+          values.contributorTechniqueOther,
+          values.contributorTechnique,
+        );
+      } else {
+        next.advisoryPositionTitle = validateAdvisoryPositionTitle(
+          values.advisoryPositionTitle,
+        );
+        next.advisoryExperience = validateAdvisoryExperience(
+          values.advisoryExperience,
+        );
+        next.advisoryDomain = validateAdvisoryDomain(values.advisoryDomain);
+        next.advisoryFeatures = validateAdvisoryFeatures(
+          values.advisoryFeatures,
+        );
+      }
     } else {
       next.email = validateEmail(values.email);
       next.password = validatePassword(values.password);
@@ -172,52 +284,93 @@ export default function Page() {
     }
     setLoading(true);
     try {
-      const payload =
-        mode === "signup"
-          ? {
-              type: "signup",
-              name: values.name.trim(),
-              email: values.email.trim(),
-              password: values.password,
-              role: values.role,
-              expertise: values.expertise.trim(),
-            }
-          : {
-              type: "login",
-              email: values.email.trim(),
-              password: values.password,
-              remember: values.remember,
-            };
+      const isSignup = mode === "signup";
+      const signupPayload = isSignup
+        ? {
+            name: values.name.trim(),
+            email: values.email.trim(),
+            password: values.password,
+            roleType: subRole,
+            contributor:
+              subRole === "contributor"
+                ? {
+                    role: values.contributorRole,
+                    roleOther:
+                      values.contributorRole === "other"
+                        ? values.contributorRoleOther.trim()
+                        : undefined,
+                    experienceText: values.contributorExperience.trim(),
+                    technique: values.contributorTechnique,
+                    techniqueOther:
+                      values.contributorTechnique === "other"
+                        ? values.contributorTechniqueOther.trim()
+                        : undefined,
+                  }
+                : undefined,
+            advisory:
+              subRole === "advisory"
+                ? {
+                    positionTitle: values.advisoryPositionTitle.trim(),
+                    experienceYears: values.advisoryExperience.trim(),
+                    domain: values.advisoryDomain.trim(),
+                    lmsFeatures: values.advisoryFeatures.trim(),
+                  }
+                : undefined,
+          }
+        : null;
 
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = isSignup
+        ? await fetch("/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(signupPayload),
+          })
+        : await fetch(
+            `/api/login?${new URLSearchParams({
+              email: values.email.trim(),
+              password: values.password,
+              remember: values.remember ? "true" : "false",
+            }).toString()}`,
+            {
+              method: "GET",
+              headers: { Accept: "application/json" },
+            },
+          );
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setGlobalError(
-          data?.message ||
+          data?.error ||
+            data?.message ||
             "There was a problem. Please verify your details and try again.",
         );
       } else {
         // Log safe payload example (excluding password)
         console.info("Auth success", {
-          type: payload.type,
+          type: isSignup ? "signup" : "login",
           email: values.email.trim(),
-          role: mode === "signup" ? values.role : undefined,
+          roleType: isSignup
+            ? signupPayload?.roleType
+            : data?.user?.roleType,
         });
         setSuccessMessage(
-          mode === "signup"
+          isSignup
             ? "Signup successful! Welcome aboard."
             : "Login successful!",
         );
-        // Optionally clear password
-        setValues((prev) => ({ ...prev, password: "" }));
+        // Optionally clear password / reset form for signup
+        setValues((prev) =>
+          isSignup
+            ? {
+                ...defaultValues,
+                email: prev.email,
+              }
+            : { ...prev, password: "" },
+        );
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setGlobalError("Network error. Please retry shortly.");
+      console.error("Auth error", err);
     } finally {
       setLoading(false);
     }
@@ -225,7 +378,7 @@ export default function Page() {
 
   // Accessible keyboard navigation for top-level tabs
   const handleTabKey = (
-    e: React.KeyboardEvent<HTMLDivElement>,
+    e: React.KeyboardEvent<HTMLElement>,
     current: Mode,
   ) => {
     if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
@@ -235,8 +388,8 @@ export default function Page() {
   };
 
   const handleSubRoleKey = (
-    e: React.KeyboardEvent<HTMLDivElement>,
-    current: SubRole,
+    e: React.KeyboardEvent<HTMLElement>,
+    current: RoleType,
   ) => {
     if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
       e.preventDefault();
@@ -489,86 +642,351 @@ export default function Page() {
               )}
             </div>
 
-            {mode === "signup" && (
-              <>
+            {mode === "signup" && subRole === "contributor" && (
+              <section className="space-y-5">
                 <div>
                   <label
-                    htmlFor="role"
+                    htmlFor="contributorRole"
                     className="block text-sm font-medium mb-1"
                   >
-                    Role<span className="text-pink-300"> *</span>
+                    Contributor role<span className="text-pink-300"> *</span>
                   </label>
                   <select
-                    id="role"
-                    name="role"
+                    id="contributorRole"
+                    name="contributorRole"
                     disabled={loading}
-                    value={values.role}
+                    value={values.contributorRole}
                     onChange={handleChange}
-                    onBlur={() => validateField("role")}
-                    aria-invalid={!!errors.role}
-                    aria-describedby={errors.role ? "error-role" : undefined}
-                    className={inputClass(errors.role)}
+                    onBlur={() => validateField("contributorRole")}
+                    aria-invalid={!!errors.contributorRole}
+                    aria-describedby={
+                      errors.contributorRole ? "error-contributor-role" : undefined
+                    }
+                    className={inputClass(errors.contributorRole)}
                   >
                     <option value="">Select a role</option>
-                    <option value="Advisor">Advisor</option>
-                    <option value="Contributor">Contributor</option>
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="psychologist">Psychologist</option>
+                    <option value="other">Other</option>
                   </select>
-                  {errors.role && (
-                    <p id="error-role" className="mt-1 text-xs text-red-300">
-                      {errors.role}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label
-                    htmlFor="expertise"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Expertise{" "}
-                    {values.role === "Advisor" && (
-                      <span className="text-pink-300">*</span>
-                    )}
-                  </label>
-                  <textarea
-                    id="expertise"
-                    name="expertise"
-                    disabled={loading}
-                    value={values.expertise}
-                    onChange={handleChange}
-                    onBlur={() => validateField("expertise")}
-                    aria-invalid={!!errors.expertise}
-                    aria-describedby={
-                      errors.expertise ? "error-expertise" : "expertise-hint"
-                    }
-                    className={
-                      inputClass(errors.expertise) + " min-h-[100px] resize-y"
-                    }
-                    placeholder={
-                      values.role === "Advisor"
-                        ? "Describe your domain expertise..."
-                        : "Optional. Share relevant skills (recommended ≥ 20 chars)"
-                    }
-                  />
-                  {!errors.expertise && (
+                  {errors.contributorRole && (
                     <p
-                      id="expertise-hint"
-                      className="mt-1 text-[11px] text-slate-400"
-                    >
-                      {values.role === "Advisor"
-                        ? "Required; help evaluators understand your background."
-                        : "Optional, but helps us match opportunities."}
-                    </p>
-                  )}
-                  {errors.expertise && (
-                    <p
-                      id="error-expertise"
+                      id="error-contributor-role"
                       className="mt-1 text-xs text-red-300"
                     >
-                      {errors.expertise}
+                      {errors.contributorRole}
                     </p>
                   )}
                 </div>
-              </>
+
+                {values.contributorRole === "other" && (
+                  <div>
+                    <label
+                      htmlFor="contributorRoleOther"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Describe your role<span className="text-pink-300"> *</span>
+                    </label>
+                    <input
+                      id="contributorRoleOther"
+                      name="contributorRoleOther"
+                      type="text"
+                      disabled={loading}
+                      value={values.contributorRoleOther}
+                      onChange={handleChange}
+                      onBlur={() => validateField("contributorRoleOther")}
+                      aria-invalid={!!errors.contributorRoleOther}
+                      aria-describedby={
+                        errors.contributorRoleOther
+                          ? "error-contributor-role-other"
+                          : undefined
+                      }
+                      className={inputClass(errors.contributorRoleOther)}
+                      placeholder="Tell us your title"
+                    />
+                    {errors.contributorRoleOther && (
+                      <p
+                        id="error-contributor-role-other"
+                        className="mt-1 text-xs text-red-300"
+                      >
+                        {errors.contributorRoleOther}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  <label
+                    htmlFor="contributorExperience"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Tell us about your experience
+                    <span className="text-pink-300"> *</span>
+                  </label>
+                  <textarea
+                    id="contributorExperience"
+                    name="contributorExperience"
+                    disabled={loading}
+                    value={values.contributorExperience}
+                    onChange={handleChange}
+                    onBlur={() => validateField("contributorExperience")}
+                    aria-invalid={!!errors.contributorExperience}
+                    aria-describedby={
+                      errors.contributorExperience
+                        ? "error-contributor-experience"
+                        : "contributor-experience-hint"
+                    }
+                    className={
+                      inputClass(errors.contributorExperience) +
+                      " min-h-[110px] resize-y"
+                    }
+                    placeholder="Share highlights, projects, or goals in 20+ characters"
+                  />
+                  {!errors.contributorExperience && (
+                    <p
+                      id="contributor-experience-hint"
+                      className="mt-1 text-[11px] text-slate-400"
+                    >
+                      Helps us understand how you want to collaborate.
+                    </p>
+                  )}
+                  {errors.contributorExperience && (
+                    <p
+                      id="error-contributor-experience"
+                      className="mt-1 text-xs text-red-300"
+                    >
+                      {errors.contributorExperience}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="contributorTechnique"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Which technique keeps you focused?
+                    <span className="text-pink-300"> *</span>
+                  </label>
+                  <select
+                    id="contributorTechnique"
+                    name="contributorTechnique"
+                    disabled={loading}
+                    value={values.contributorTechnique}
+                    onChange={handleChange}
+                    onBlur={() => validateField("contributorTechnique")}
+                    aria-invalid={!!errors.contributorTechnique}
+                    aria-describedby={
+                      errors.contributorTechnique
+                        ? "error-contributor-technique"
+                        : undefined
+                    }
+                    className={inputClass(errors.contributorTechnique)}
+                  >
+                    <option value="">Select a technique</option>
+                    <option value="pomodoro">Pomodoro (25/5)</option>
+                    <option value="45/15">45/15</option>
+                    <option value="flow">Deep Flow</option>
+                    <option value="other">Other</option>
+                  </select>
+                  {errors.contributorTechnique && (
+                    <p
+                      id="error-contributor-technique"
+                      className="mt-1 text-xs text-red-300"
+                    >
+                      {errors.contributorTechnique}
+                    </p>
+                  )}
+                </div>
+
+                {values.contributorTechnique === "other" && (
+                  <div>
+                    <label
+                      htmlFor="contributorTechniqueOther"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Tell us the technique<span className="text-pink-300"> *</span>
+                    </label>
+                    <input
+                      id="contributorTechniqueOther"
+                      name="contributorTechniqueOther"
+                      type="text"
+                      disabled={loading}
+                      value={values.contributorTechniqueOther}
+                      onChange={handleChange}
+                      onBlur={() => validateField("contributorTechniqueOther")}
+                      aria-invalid={!!errors.contributorTechniqueOther}
+                      aria-describedby={
+                        errors.contributorTechniqueOther
+                          ? "error-contributor-technique-other"
+                          : undefined
+                      }
+                      className={inputClass(errors.contributorTechniqueOther)}
+                      placeholder="e.g. Time-blocking"
+                    />
+                    {errors.contributorTechniqueOther && (
+                      <p
+                        id="error-contributor-technique-other"
+                        className="mt-1 text-xs text-red-300"
+                      >
+                        {errors.contributorTechniqueOther}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {mode === "signup" && subRole === "advisory" && (
+              <section className="space-y-5">
+                <div>
+                  <label
+                    htmlFor="advisoryPositionTitle"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Role / Position title
+                    <span className="text-pink-300"> *</span>
+                  </label>
+                  <input
+                    id="advisoryPositionTitle"
+                    name="advisoryPositionTitle"
+                    type="text"
+                    disabled={loading}
+                    value={values.advisoryPositionTitle}
+                    onChange={handleChange}
+                    onBlur={() => validateField("advisoryPositionTitle")}
+                    aria-invalid={!!errors.advisoryPositionTitle}
+                    aria-describedby={
+                      errors.advisoryPositionTitle
+                        ? "error-advisory-position"
+                        : undefined
+                    }
+                    className={inputClass(errors.advisoryPositionTitle)}
+                    placeholder="e.g. Director of Learning"
+                  />
+                  {errors.advisoryPositionTitle && (
+                    <p
+                      id="error-advisory-position"
+                      className="mt-1 text-xs text-red-300"
+                    >
+                      {errors.advisoryPositionTitle}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="advisoryExperience"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Experience (years or summary)
+                    <span className="text-pink-300"> *</span>
+                  </label>
+                  <input
+                    id="advisoryExperience"
+                    name="advisoryExperience"
+                    type="text"
+                    disabled={loading}
+                    value={values.advisoryExperience}
+                    onChange={handleChange}
+                    onBlur={() => validateField("advisoryExperience")}
+                    aria-invalid={!!errors.advisoryExperience}
+                    aria-describedby={
+                      errors.advisoryExperience
+                        ? "error-advisory-experience"
+                        : undefined
+                    }
+                    className={inputClass(errors.advisoryExperience)}
+                    placeholder="15 years leading curriculum teams"
+                  />
+                  {errors.advisoryExperience && (
+                    <p
+                      id="error-advisory-experience"
+                      className="mt-1 text-xs text-red-300"
+                    >
+                      {errors.advisoryExperience}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="advisoryDomain"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Domain of experience<span className="text-pink-300"> *</span>
+                  </label>
+                  <input
+                    id="advisoryDomain"
+                    name="advisoryDomain"
+                    type="text"
+                    disabled={loading}
+                    value={values.advisoryDomain}
+                    onChange={handleChange}
+                    onBlur={() => validateField("advisoryDomain")}
+                    aria-invalid={!!errors.advisoryDomain}
+                    aria-describedby={
+                      errors.advisoryDomain ? "error-advisory-domain" : undefined
+                    }
+                    className={inputClass(errors.advisoryDomain)}
+                    placeholder="K-12 STEM, Higher-Ed Analytics, etc."
+                  />
+                  {errors.advisoryDomain && (
+                    <p
+                      id="error-advisory-domain"
+                      className="mt-1 text-xs text-red-300"
+                    >
+                      {errors.advisoryDomain}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="advisoryFeatures"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    What features are perfect for an LMS/ERP?
+                    <span className="text-pink-300"> *</span>
+                  </label>
+                  <textarea
+                    id="advisoryFeatures"
+                    name="advisoryFeatures"
+                    disabled={loading}
+                    value={values.advisoryFeatures}
+                    onChange={handleChange}
+                    onBlur={() => validateField("advisoryFeatures")}
+                    aria-invalid={!!errors.advisoryFeatures}
+                    aria-describedby={
+                      errors.advisoryFeatures
+                        ? "error-advisory-features"
+                        : "advisory-features-hint"
+                    }
+                    className={
+                      inputClass(errors.advisoryFeatures) +
+                      " min-h-[120px] resize-y"
+                    }
+                    placeholder="Share the must-haves you expect from a modern platform"
+                  />
+                  {!errors.advisoryFeatures && (
+                    <p
+                      id="advisory-features-hint"
+                      className="mt-1 text-[11px] text-slate-400"
+                    >
+                      Your insight guides what we build next.
+                    </p>
+                  )}
+                  {errors.advisoryFeatures && (
+                    <p
+                      id="error-advisory-features"
+                      className="mt-1 text-xs text-red-300"
+                    >
+                      {errors.advisoryFeatures}
+                    </p>
+                  )}
+                </div>
+              </section>
             )}
 
             {mode === "login" && (
@@ -626,7 +1044,7 @@ Security notes (client-side):
 */
 
 /*
-Example successful signup POST:
+Example successful contributor signup POST:
 fetch('/api/login', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -635,20 +1053,38 @@ fetch('/api/login', {
     name: 'Jane Doe',
     email: 'jane@demo.com',
     password: 'CorrectHorseBattery1',
-    role: 'Advisor',
-    expertise: '15 years in healthcare innovation...',
+    roleType: 'contributor',
+    contributor: {
+      role: 'teacher',
+      experienceText: 'I run self-paced maker labs for high schoolers...',
+      technique: 'pomodoro',
+    },
   }),
 });
 
-Example successful login POST:
+Example successful advisory signup POST:
 fetch('/api/login', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    type: 'login',
-    email: 'jane@demo.com',
+    type: 'signup',
+    name: 'Alex Kim',
+    email: 'alex@demo.com',
     password: 'CorrectHorseBattery1',
-    remember: true,
+    roleType: 'advisory',
+    advisory: {
+      positionTitle: 'Dean of Academics',
+      experienceYears: '18',
+      domain: 'Higher Education',
+      lmsFeatures: 'Analytics dashboards, SIS integrations, and competency tracking.',
+    },
   }),
 });
+
+Example successful login GET:
+fetch(`/api/login?${new URLSearchParams({
+  email: 'jane@demo.com',
+  password: 'CorrectHorseBattery1',
+  remember: 'true',
+}).toString()}`);
 */
