@@ -26,7 +26,7 @@ interface SignupBody {
   };
 }
 
-const COOKIE_MAX_AGE = 60 * 60 * 24; // 1 day
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 function toSafeUser(doc: any): AuthTokenPayload {
   return {
@@ -170,6 +170,7 @@ export async function POST(req: NextRequest) {
       success: true,
       user: safeUser,
       token,
+      redirect: "/dashboard",
     });
 
     setAuthCookie(response, token, true);
@@ -228,6 +229,7 @@ export async function GET(req: NextRequest) {
       success: true,
       user: safeUser,
       token,
+      redirect: "/dashboard",
     });
 
     const rememberSession = req.nextUrl.searchParams.get("remember") === "true";

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 
 /**
@@ -96,6 +97,7 @@ export default function Page() {
   const [mode, setMode] = useState<Mode>("signup");
   const [subRole, setSubRole] = useState<RoleType>("advisory");
   const [reduceMotion, setReduceMotion] = useState(false);
+  const router = useRouter();
 
   // Form state
   const defaultValues = {
@@ -367,6 +369,9 @@ export default function Page() {
               }
             : { ...prev, password: "" },
         );
+
+        const redirectTo = data?.redirect ?? "/dashboard";
+        router.push(redirectTo);
       }
     } catch (err: unknown) {
       setGlobalError("Network error. Please retry shortly.");
