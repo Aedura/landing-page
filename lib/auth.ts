@@ -11,7 +11,7 @@ export interface AuthTokenPayload {
   roleType: RoleType;
 }
 
-const DEFAULT_EXPIRATION = "1d";
+const DEFAULT_EXPIRATION = "7d";
 
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
@@ -23,7 +23,7 @@ function getJwtSecret(): string {
 
 export function signAuthToken(
   payload: AuthTokenPayload,
-  options: SignOptions = {}
+  options: SignOptions = {},
 ): string {
   return jwt.sign(payload, getJwtSecret(), {
     expiresIn: DEFAULT_EXPIRATION,
