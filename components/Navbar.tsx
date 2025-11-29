@@ -50,6 +50,12 @@ const Navbar = () => {
             >
               Tech
             </Link>
+            <Link
+              href="/info"
+              className="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200" 
+            >
+              About
+            </Link>
           </div>
 
           {/* CTA Button & Mobile Menu Toggle */}
