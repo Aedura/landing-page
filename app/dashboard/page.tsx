@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col bg-linear-to-b from-black from-5% to-[#0B0048] text-slate-100">
+    <main className="min-h-screen flex flex-col bg-linear-to-b from-black from-5% to-[#0B0048] text-slate-100 font-sans">
       <Navbar />
       <section className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-xl rounded-3xl border border-white/30 bg-black/20 backdrop-blur-xl shadow-2xl shadow-blue-950/60 p-6 sm:p-8 transition-all duration-700 ease-out">

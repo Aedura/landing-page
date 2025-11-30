@@ -2,6 +2,7 @@
 
 import Navbar from "@/components/Navbar";
 import { ArrowUpRight, Github, Loader2, Mail } from "lucide-react";
+import { redirect } from "next/navigation";
 import React, { useState } from "react";
 
 interface EmailFormProps {
@@ -135,53 +136,54 @@ function CountdownTimer() {
 const ContributorCard = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  // const [name, setName] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [loading, setLoading] = useState(false);
+  // const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoading(true);
-    setMessage(null);
+  // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+  //   setLoading(true);
+  //   setMessage(null);
 
-    try {
-      const response = await fetch("/api/contribute", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email })
-      });
+  //   try {
+  //     const response = await fetch("/api/contribute", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ name, email })
+  //     });
 
-      const data: { error?: string } = await response.json().catch(() => ({}));
+  //     const data: { error?: string } = await response.json().catch(() => ({}));
 
-      if (response.ok) {
-        setMessage({ type: "success", text: "Thanks for reaching out! We'll connect with you soon." });
-        setName("");
-        setEmail("");
-      } else {
-        setMessage({ type: "error", text: data.error || "Something went wrong. Please try again." });
-      }
-    } catch {
-      setMessage({ type: "error", text: "Unable to submit right now. Please try again." });
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     if (response.ok) {
+  //       setMessage({ type: "success", text: "Thanks for reaching out! We'll connect with you soon." });
+  //       setName("");
+  //       setEmail("");
+  //     } else {
+  //       setMessage({ type: "error", text: data.error || "Something went wrong. Please try again." });
+  //     }
+  //   } catch {
+  //     setMessage({ type: "error", text: "Unable to submit right now. Please try again." });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleOpenForm = () => {
-    setIsAnimating(true);
-    setIsFormOpen(true);
-    setMessage(null);
+    // setIsAnimating(true);
+    // setIsFormOpen(true);
+    redirect('/login');
+    // setMessage(null);
   };
 
-  const handleClose = () => {
-    setIsAnimating(true);
-    setTimeout(() => {
-      setIsFormOpen(false);
-      setIsAnimating(false);
-      setMessage(null);
-    }, 400);
-  };
+  // const handleClose = () => {
+  //   setIsAnimating(true);
+  //   setTimeout(() => {
+  //     setIsFormOpen(false);
+  //     setIsAnimating(false);
+  //     setMessage(null);
+  //   }, 400);
+  // };
 
   return (
     <div className="group relative">
@@ -207,87 +209,18 @@ const ContributorCard = () => {
             </div>
             <h3 className="font-bold text-xl text-white">Become a Contributor</h3>
           </div>
+          <p className="text-gray-400 leading-relaxed mb-8 grow">
+            Help us build the future of education. Contribute code, ideas, or content to Aedura.
+          </p>
+          <button
+            type="button"
+            onClick={handleOpenForm}
+            className="flex items-center gap-2 text-blue-400 font-semibold group-hover:text-blue-300 transition-colors"
+          >
+            Get in touch
+            <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+          </button>
 
-          {isFormOpen ? (
-            <form onSubmit={handleSubmit} className={`flex flex-col gap-6 grow ${isAnimating && isFormOpen ? "content-opening" : isAnimating && !isFormOpen ? "content-closing" : ""}`}>
-              <p className="text-gray-400 leading-relaxed">
-                Share your details and we&apos;ll send the onboarding kit for contributors.
-              </p>
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="contributor-name" className="text-sm font-medium text-gray-300">
-                    Full name
-                  </label>
-                  <input
-                    id="contributor-name"
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
-                    placeholder="Jane Doe"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label htmlFor="contributor-email" className="text-sm font-medium text-gray-300">
-                    Work email
-                  </label>
-                  <input
-                    id="contributor-email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
-                    placeholder="you@school.edu"
-                  />
-                </div>
-              </div>
-              {message && (
-                <p className={`text-sm ${message.type === "success" ? "text-green-400" : "text-red-400"}`}>
-                  {message.text}
-                </p>
-              )}
-              <div className="flex flex-wrap gap-3 pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    "Submit"
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="px-5 py-3 bg-gray-800 text-gray-300 font-medium rounded-lg hover:bg-gray-700 transition"
-                  disabled={loading}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          ) : (
-            <>
-              <p className="text-gray-400 leading-relaxed mb-8 grow">
-                Help us build the future of education. Contribute code, ideas, or content to Aedura.
-              </p>
-              <button
-                type="button"
-                onClick={handleOpenForm}
-                className="flex items-center gap-2 text-blue-400 font-semibold group-hover:text-blue-300 transition-colors"
-              >
-                Get in touch
-                <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
-              </button>
-            </>
-          )}
         </div>
       </div>
     </div>
@@ -297,55 +230,56 @@ const ContributorCard = () => {
 const AdvisoryBoardCard = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [expertise, setExpertise] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  // const [name, setName] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [expertise, setExpertise] = useState("");
+  // const [loading, setLoading] = useState(false);
+  // const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoading(true);
-    setMessage(null);
+  // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+  //   setLoading(true);
+  //   setMessage(null);
 
-    try {
-      const response = await fetch("/api/advboard", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, expertise })
-      });
+  //   try {
+  //     const response = await fetch("/api/advboard", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ name, email, expertise })
+  //     });
 
-      const data: { error?: string } = await response.json().catch(() => ({}));
+  //     const data: { error?: string } = await response.json().catch(() => ({}));
 
-      if (response.ok) {
-        setMessage({ type: "success", text: "Thanks for your interest! We'll be in touch with next steps." });
-        setName("");
-        setEmail("");
-        setExpertise("");
-      } else {
-        setMessage({ type: "error", text: data.error || "Something went wrong. Please try again." });
-      }
-    } catch {
-      setMessage({ type: "error", text: "Unable to submit right now. Please try again." });
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     if (response.ok) {
+  //       setMessage({ type: "success", text: "Thanks for your interest! We'll be in touch with next steps." });
+  //       setName("");
+  //       setEmail("");
+  //       setExpertise("");
+  //     } else {
+  //       setMessage({ type: "error", text: data.error || "Something went wrong. Please try again." });
+  //     }
+  //   } catch {
+  //     setMessage({ type: "error", text: "Unable to submit right now. Please try again." });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleOpenForm = () => {
-    setIsAnimating(true);
-    setIsFormOpen(true);
-    setMessage(null);
+    // setIsAnimating(true);
+    // setIsFormOpen(true);
+    redirect('/login');
+    // setMessage(null);
   };
 
-  const handleClose = () => {
-    setIsAnimating(true);
-    setTimeout(() => {
-      setIsFormOpen(false);
-      setIsAnimating(false);
-      setMessage(null);
-    }, 400);
-  };
+  // const handleClose = () => {
+  //   setIsAnimating(true);
+  //   setTimeout(() => {
+  //     setIsFormOpen(false);
+  //     setIsAnimating(false);
+  //     setMessage(null);
+  //   }, 400);
+  // };
 
   return (
     <div className="group relative">
@@ -376,87 +310,6 @@ const AdvisoryBoardCard = () => {
             </div>
             <h3 className="font-bold text-xl text-white">Join Advisory Board</h3>
           </div>
-
-          {isFormOpen ? (
-            <form onSubmit={handleSubmit} className={`flex flex-col gap-6 grow ${isAnimating && isFormOpen ? "content-opening" : isAnimating && !isFormOpen ? "content-closing" : ""}`}>
-              <p className="text-gray-300 leading-relaxed">
-                Tell us a little about your background so we can schedule an introductory conversation.
-              </p>
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="advisory-name" className="text-sm font-medium text-purple-200">
-                    Full name
-                  </label>
-                  <input
-                    id="advisory-name"
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    className="w-full px-4 py-3 bg-purple-950/20 border border-purple-500/40 rounded-lg text-white placeholder-purple-300/60 focus:outline-none focus:border-purple-300 transition"
-                    placeholder="Taylor Morgan"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label htmlFor="advisory-email" className="text-sm font-medium text-purple-200">
-                    Email
-                  </label>
-                  <input
-                    id="advisory-email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    className="w-full px-4 py-3 bg-purple-950/20 border border-purple-500/40 rounded-lg text-white placeholder-purple-300/60 focus:outline-none focus:border-purple-300 transition"
-                    placeholder="you@organization.com"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label htmlFor="advisory-expertise" className="text-sm font-medium text-purple-200">
-                    Area of expertise
-                  </label>
-                  <textarea
-                    id="advisory-expertise"
-                    required
-                    value={expertise}
-                    onChange={(event) => setExpertise(event.target.value)}
-                    className="w-full px-4 py-3 bg-purple-950/20 border border-purple-500/40 rounded-lg text-white placeholder-purple-300/60 focus:outline-none focus:border-purple-300 transition h-28 resize-none"
-                    placeholder="Leadership roles, domains, or initiatives you've championed"
-                  ></textarea>
-                </div>
-              </div>
-              {message && (
-                <p className={`text-sm ${message.type === "success" ? "text-green-400" : "text-red-400"}`}>
-                  {message.text}
-                </p>
-              )}
-              <div className="flex flex-wrap gap-3 pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-purple-500 text-white font-semibold rounded-lg hover:bg-purple-400 transition disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    "Submit"
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="px-5 py-3 bg-black/40 text-purple-200 font-medium rounded-lg hover:bg-black/60 transition"
-                  disabled={loading}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          ) : (
-            <>
               <p className="text-gray-300 leading-relaxed mb-8 grow">
                 Shape our vision and strategy. We&apos;re looking for experienced education leaders to guide our mission.
               </p>
@@ -468,8 +321,6 @@ const AdvisoryBoardCard = () => {
                 Get in touch
                 <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
               </button>
-            </>
-          )}
         </div>
       </div>
     </div>

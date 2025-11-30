@@ -415,24 +415,22 @@ export default function Page() {
     setMounted(true);
   }, []);
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 bg-linear-to-b from-black from-5%  to-[#0B0048] text-slate-100 transition-colors">
+    <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-white font-sans">
       <Navbar />
+      
       <div
-        className={
-          "w-full max-w-xl rounded-3xl border border-white/30 bg-black/20  backdrop-blur-xl shadow-2xl shadow-blue-950/60 p-6 sm:p-8 relative transition-all duration-700 ease-out " +
-          (mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")
-        }
+        className={`mt-20 w-full max-w-2xl rounded-3xl border border-white/20 bg-black/30 backdrop-blur-2xl shadow-2xl shadow-blue-500/10 p-6 sm:p-10 relative transition-all duration-700 ease-out ${
+          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
         style={{
-          WebkitBackdropFilter: "blur(20px)",
-          backgroundImage:
-            "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))",
+          backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
         }}
       >
         {/* Top-level tabs */}
         <div
           role="tablist"
           aria-label="Authentication modes"
-          className="flex gap-2 mb-6"
+          className="flex gap-3 mb-8"
         >
           <button
             role="tab"
@@ -442,10 +440,10 @@ export default function Page() {
             tabIndex={mode === "signup" ? 0 : -1}
             onClick={() => setMode("signup")}
             onKeyDown={(e) => handleTabKey(e, mode)}
-            className={`flex-1 px-4 py-2 rounded-full text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 ring-white/60 ${
+            className={`flex-1 px-6 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 ring-white/60 ring-offset-2 ring-offset-transparent ${
               mode === "signup"
-                ? "bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-inner"
-                : "bg-blue-950/40 hover:bg-blue-900/50 text-slate-200"
+                ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30 scale-[1.02]"
+                : "bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white"
             }`}
           >
             Sign Up
@@ -458,10 +456,10 @@ export default function Page() {
             tabIndex={mode === "login" ? 0 : -1}
             onClick={() => setMode("login")}
             onKeyDown={(e) => handleTabKey(e, mode)}
-            className={`flex-1 px-4 py-2 rounded-full text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 ring-white/60 ${
+            className={`flex-1 px-6 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 ring-white/60 ring-offset-2 ring-offset-transparent ${
               mode === "login"
-                ? "bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-inner"
-                : "bg-blue-950/40 hover:bg-blue-900/50 text-slate-200"
+                ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30 scale-[1.02]"
+                : "bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white"
             }`}
           >
             Login
@@ -473,7 +471,7 @@ export default function Page() {
           <div
             role="tablist"
             aria-label="Signup role selection"
-            className="flex mb-6 rounded-full bg-white/5 p-1"
+            className="flex mb-8 rounded-2xl bg-white/5 p-1.5 border border-white/10"
           >
             <button
               role="tab"
@@ -483,10 +481,10 @@ export default function Page() {
               tabIndex={subRole === "advisory" ? 0 : -1}
               onClick={() => setSubRole("advisory")}
               onKeyDown={(e) => handleSubRoleKey(e, subRole)}
-              className={`flex-1 px-3 py-2 text-xs sm:text-sm rounded-full transition-colors focus:outline-none focus-visible:ring-2 ring-white/50 ${
+              className={`flex-1 px-4 py-2.5 text-xs sm:text-sm font-medium rounded-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 ring-white/50 ${
                 subRole === "advisory"
-                  ? "bg-blue-700/80 text-white"
-                  : "text-slate-200 hover:bg-blue-900/40"
+                  ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md"
+                  : "text-slate-300 hover:text-white hover:bg-white/5"
               }`}
             >
               Advisory Board
@@ -499,10 +497,10 @@ export default function Page() {
               tabIndex={subRole === "contributor" ? 0 : -1}
               onClick={() => setSubRole("contributor")}
               onKeyDown={(e) => handleSubRoleKey(e, subRole)}
-              className={`flex-1 px-3 py-2 text-xs sm:text-sm rounded-full transition-colors focus:outline-none focus-visible:ring-2 ring-white/50 ${
+              className={`flex-1 px-4 py-2.5 text-xs sm:text-sm font-medium rounded-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 ring-white/50 ${
                 subRole === "contributor"
-                  ? "bg-blue-700/80 text-white"
-                  : "text-slate-200 hover:bg-blue-900/40"
+                  ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md"
+                  : "text-slate-300 hover:text-white hover:bg-white/5"
               }`}
             >
               Contributor
@@ -518,7 +516,7 @@ export default function Page() {
         >
           {globalError && (
             <div
-              className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+              className="mb-6 rounded-xl border border-red-400/30 bg-red-500/10 px-5 py-4 text-sm text-red-200 backdrop-blur-sm"
               role="alert"
             >
               {globalError}
@@ -526,7 +524,7 @@ export default function Page() {
           )}
           {successMessage && (
             <div
-              className="mb-4 rounded-lg border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-200"
+              className="mb-6 rounded-xl border border-green-400/30 bg-green-500/10 px-5 py-4 text-sm text-green-200 backdrop-blur-sm"
               role="status"
             >
               {successMessage}
@@ -535,16 +533,16 @@ export default function Page() {
           <form
             onSubmit={handleSubmit}
             noValidate
-            className="space-y-5"
+            className="space-y-6"
             aria-describedby="password-requirements"
           >
             {mode === "signup" && (
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium mb-1"
+                  className="block text-sm font-semibold mb-2 text-slate-200"
                 >
-                  Full Name<span className="text-pink-300"> *</span>
+                  Full Name<span className="text-pink-400 ml-1">*</span>
                 </label>
                 <input
                   id="name"
@@ -560,16 +558,16 @@ export default function Page() {
                   placeholder="Jane Doe"
                 />
                 {errors.name && (
-                  <p id="error-name" className="mt-1 text-xs text-red-300">
-                    {errors.name}
+                  <p id="error-name" className="mt-2 text-xs text-red-300 flex items-center gap-1">
+                    <span>⚠</span> {errors.name}
                   </p>
                 )}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-1">
-                Email<span className="text-pink-300"> *</span>
+              <label htmlFor="email" className="block text-sm font-semibold mb-2 text-slate-200">
+                Email<span className="text-pink-400 ml-1">*</span>
               </label>
               <input
                 id="email"
@@ -586,8 +584,8 @@ export default function Page() {
                 autoComplete="email"
               />
               {errors.email && (
-                <p id="error-email" className="mt-1 text-xs text-red-300">
-                  {errors.email}
+                <p id="error-email" className="mt-2 text-xs text-red-300 flex items-center gap-1">
+                  <span>⚠</span> {errors.email}
                 </p>
               )}
             </div>
@@ -595,9 +593,9 @@ export default function Page() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium mb-1"
+                className="block text-sm font-semibold mb-2 text-slate-200"
               >
-                Password<span className="text-pink-300"> *</span>
+                Password<span className="text-pink-400 ml-1">*</span>
               </label>
               <div className="relative">
                 <input
@@ -614,7 +612,7 @@ export default function Page() {
                       ? "error-password"
                       : "password-hint password-requirements"
                   }
-                  className={inputClass(errors.password) + " pr-14"}
+                  className={inputClass(errors.password) + " pr-16"}
                   placeholder="••••••••"
                   autoComplete={
                     mode === "login" ? "current-password" : "new-password"
@@ -623,38 +621,40 @@ export default function Page() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute top-1/2 -translate-y-1/2 right-2 text-xs px-2 py-1 rounded-full bg-white/10 hover:bg-white/20 focus:outline-none focus-visible:ring-2 ring-indigo-400"
+                  className="absolute top-1/2 -translate-y-1/2 right-3 text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 focus:outline-none focus-visible:ring-2 ring-indigo-400 transition-all font-medium"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
-              <div className="mt-1 flex items-center gap-2">
-                <p id="password-hint" className="text-[11px] text-slate-300">
-                  Strength: {passwordStrength || "—"}
-                </p>
-                <p
-                  id="password-requirements"
-                  className="text-[11px] text-slate-400"
-                >
-                  Requires 8+ chars incl. upper, lower & number.
-                </p>
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                <span className="text-slate-300">
+                  Strength: <span className={`font-semibold ${passwordStrength === 'Strong' ? 'text-green-400' : passwordStrength === 'Weak' ? 'text-yellow-400' : 'text-slate-400'}`}>
+                    {passwordStrength || "—"}
+                  </span>
+                </span>
+                <span className="text-slate-500">•</span>
+                <span className="text-slate-400">
+                  Min 8 chars with uppercase, lowercase & number
+                </span>
               </div>
               {errors.password && (
-                <p id="error-password" className="mt-1 text-xs text-red-300">
-                  {errors.password}
+                <p id="error-password" className="mt-2 text-xs text-red-300 flex items-center gap-1">
+                  <span>⚠</span> {errors.password}
                 </p>
               )}
             </div>
 
             {mode === "signup" && subRole === "contributor" && (
-              <section className="space-y-5">
+              <section className="space-y-6 pt-2">
+                <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                
                 <div>
                   <label
                     htmlFor="contributorRole"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-semibold mb-2 text-slate-200"
                   >
-                    Contributor role<span className="text-pink-300"> *</span>
+                    Contributor Role<span className="text-pink-400 ml-1">*</span>
                   </label>
                   <select
                     id="contributorRole"
@@ -678,9 +678,9 @@ export default function Page() {
                   {errors.contributorRole && (
                     <p
                       id="error-contributor-role"
-                      className="mt-1 text-xs text-red-300"
+                      className="mt-2 text-xs text-red-300 flex items-center gap-1"
                     >
-                      {errors.contributorRole}
+                      <span>⚠</span> {errors.contributorRole}
                     </p>
                   )}
                 </div>
@@ -689,9 +689,9 @@ export default function Page() {
                   <div>
                     <label
                       htmlFor="contributorRoleOther"
-                      className="block text-sm font-medium mb-1"
+                      className="block text-sm font-semibold mb-2 text-slate-200"
                     >
-                      Describe your role<span className="text-pink-300"> *</span>
+                      Describe Your Role<span className="text-pink-400 ml-1">*</span>
                     </label>
                     <input
                       id="contributorRoleOther"
@@ -713,9 +713,9 @@ export default function Page() {
                     {errors.contributorRoleOther && (
                       <p
                         id="error-contributor-role-other"
-                        className="mt-1 text-xs text-red-300"
+                        className="mt-2 text-xs text-red-300 flex items-center gap-1"
                       >
-                        {errors.contributorRoleOther}
+                        <span>⚠</span> {errors.contributorRoleOther}
                       </p>
                     )}
                   </div>
@@ -724,10 +724,10 @@ export default function Page() {
                 <div>
                   <label
                     htmlFor="contributorExperience"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-semibold mb-2 text-slate-200"
                   >
-                    Tell us about your experience
-                    <span className="text-pink-300"> *</span>
+                    Tell Us About Your Experience
+                    <span className="text-pink-400 ml-1">*</span>
                   </label>
                   <textarea
                     id="contributorExperience"
@@ -744,24 +744,24 @@ export default function Page() {
                     }
                     className={
                       inputClass(errors.contributorExperience) +
-                      " min-h-[110px] resize-y"
+                      " min-h-[120px] resize-y"
                     }
-                    placeholder="Share highlights, projects, or goals in 20+ characters"
+                    placeholder="Share highlights, projects, or goals (min 20 characters)"
                   />
                   {!errors.contributorExperience && (
                     <p
                       id="contributor-experience-hint"
-                      className="mt-1 text-[11px] text-slate-400"
+                      className="mt-2 text-[11px] text-slate-400"
                     >
-                      Helps us understand how you want to collaborate.
+                      Helps us understand how you want to collaborate
                     </p>
                   )}
                   {errors.contributorExperience && (
                     <p
                       id="error-contributor-experience"
-                      className="mt-1 text-xs text-red-300"
+                      className="mt-2 text-xs text-red-300 flex items-center gap-1"
                     >
-                      {errors.contributorExperience}
+                      <span>⚠</span> {errors.contributorExperience}
                     </p>
                   )}
                 </div>
@@ -769,10 +769,10 @@ export default function Page() {
                 <div>
                   <label
                     htmlFor="contributorTechnique"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-semibold mb-2 text-slate-200"
                   >
-                    Which technique keeps you focused?
-                    <span className="text-pink-300"> *</span>
+                    Focus Technique
+                    <span className="text-pink-400 ml-1">*</span>
                   </label>
                   <select
                     id="contributorTechnique"
@@ -798,9 +798,9 @@ export default function Page() {
                   {errors.contributorTechnique && (
                     <p
                       id="error-contributor-technique"
-                      className="mt-1 text-xs text-red-300"
+                      className="mt-2 text-xs text-red-300 flex items-center gap-1"
                     >
-                      {errors.contributorTechnique}
+                      <span>⚠</span> {errors.contributorTechnique}
                     </p>
                   )}
                 </div>
@@ -809,9 +809,9 @@ export default function Page() {
                   <div>
                     <label
                       htmlFor="contributorTechniqueOther"
-                      className="block text-sm font-medium mb-1"
+                      className="block text-sm font-semibold mb-2 text-slate-200"
                     >
-                      Tell us the technique<span className="text-pink-300"> *</span>
+                      Your Technique<span className="text-pink-400 ml-1">*</span>
                     </label>
                     <input
                       id="contributorTechniqueOther"
@@ -833,9 +833,9 @@ export default function Page() {
                     {errors.contributorTechniqueOther && (
                       <p
                         id="error-contributor-technique-other"
-                        className="mt-1 text-xs text-red-300"
+                        className="mt-2 text-xs text-red-300 flex items-center gap-1"
                       >
-                        {errors.contributorTechniqueOther}
+                        <span>⚠</span> {errors.contributorTechniqueOther}
                       </p>
                     )}
                   </div>
@@ -844,14 +844,16 @@ export default function Page() {
             )}
 
             {mode === "signup" && subRole === "advisory" && (
-              <section className="space-y-5">
+              <section className="space-y-6 pt-2">
+                <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                
                 <div>
                   <label
                     htmlFor="advisoryPositionTitle"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-semibold mb-2 text-slate-200"
                   >
-                    Role / Position title
-                    <span className="text-pink-300"> *</span>
+                    Role / Position Title
+                    <span className="text-pink-400 ml-1">*</span>
                   </label>
                   <input
                     id="advisoryPositionTitle"
@@ -873,9 +875,9 @@ export default function Page() {
                   {errors.advisoryPositionTitle && (
                     <p
                       id="error-advisory-position"
-                      className="mt-1 text-xs text-red-300"
+                      className="mt-2 text-xs text-red-300 flex items-center gap-1"
                     >
-                      {errors.advisoryPositionTitle}
+                      <span>⚠</span> {errors.advisoryPositionTitle}
                     </p>
                   )}
                 </div>
@@ -883,10 +885,10 @@ export default function Page() {
                 <div>
                   <label
                     htmlFor="advisoryExperience"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-semibold mb-2 text-slate-200"
                   >
-                    Experience (years or summary)
-                    <span className="text-pink-300"> *</span>
+                    Experience
+                    <span className="text-pink-400 ml-1">*</span>
                   </label>
                   <input
                     id="advisoryExperience"
@@ -903,14 +905,14 @@ export default function Page() {
                         : undefined
                     }
                     className={inputClass(errors.advisoryExperience)}
-                    placeholder="15 years leading curriculum teams"
+                    placeholder="e.g. 15 years leading curriculum teams"
                   />
                   {errors.advisoryExperience && (
                     <p
                       id="error-advisory-experience"
-                      className="mt-1 text-xs text-red-300"
+                      className="mt-2 text-xs text-red-300 flex items-center gap-1"
                     >
-                      {errors.advisoryExperience}
+                      <span>⚠</span> {errors.advisoryExperience}
                     </p>
                   )}
                 </div>
@@ -918,9 +920,9 @@ export default function Page() {
                 <div>
                   <label
                     htmlFor="advisoryDomain"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-semibold mb-2 text-slate-200"
                   >
-                    Domain of experience<span className="text-pink-300"> *</span>
+                    Domain of Experience<span className="text-pink-400 ml-1">*</span>
                   </label>
                   <input
                     id="advisoryDomain"
@@ -940,9 +942,9 @@ export default function Page() {
                   {errors.advisoryDomain && (
                     <p
                       id="error-advisory-domain"
-                      className="mt-1 text-xs text-red-300"
+                      className="mt-2 text-xs text-red-300 flex items-center gap-1"
                     >
-                      {errors.advisoryDomain}
+                      <span>⚠</span> {errors.advisoryDomain}
                     </p>
                   )}
                 </div>
@@ -950,10 +952,10 @@ export default function Page() {
                 <div>
                   <label
                     htmlFor="advisoryFeatures"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-semibold mb-2 text-slate-200"
                   >
-                    What features are perfect for an LMS/ERP?
-                    <span className="text-pink-300"> *</span>
+                    Ideal LMS/ERP Features
+                    <span className="text-pink-400 ml-1">*</span>
                   </label>
                   <textarea
                     id="advisoryFeatures"
@@ -970,24 +972,24 @@ export default function Page() {
                     }
                     className={
                       inputClass(errors.advisoryFeatures) +
-                      " min-h-[120px] resize-y"
+                      " min-h-[130px] resize-y"
                     }
                     placeholder="Share the must-haves you expect from a modern platform"
                   />
                   {!errors.advisoryFeatures && (
                     <p
                       id="advisory-features-hint"
-                      className="mt-1 text-[11px] text-slate-400"
+                      className="mt-2 text-[11px] text-slate-400"
                     >
-                      Your insight guides what we build next.
+                      Your insight guides what we build next
                     </p>
                   )}
                   {errors.advisoryFeatures && (
                     <p
                       id="error-advisory-features"
-                      className="mt-1 text-xs text-red-300"
+                      className="mt-2 text-xs text-red-300 flex items-center gap-1"
                     >
-                      {errors.advisoryFeatures}
+                      <span>⚠</span> {errors.advisoryFeatures}
                     </p>
                   )}
                 </div>
@@ -995,7 +997,7 @@ export default function Page() {
             )}
 
             {mode === "login" && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <input
                   id="remember"
                   name="remember"
@@ -1003,19 +1005,19 @@ export default function Page() {
                   checked={values.remember}
                   disabled={loading}
                   onChange={handleChange}
-                  className="h-4 w-4 rounded border-white/30 bg-white/10 text-indigo-500 focus:ring-indigo-400 focus:outline-none"
+                  className="h-4 w-4 rounded border-white/30 bg-white/10 text-blue-500 focus:ring-2 focus:ring-blue-400 focus:ring-offset-0 cursor-pointer"
                 />
-                <label htmlFor="remember" className="text-sm text-slate-200">
-                  Remember me (device only)
+                <label htmlFor="remember" className="text-sm text-slate-300 cursor-pointer select-none">
+                  Remember me on this device
                 </label>
               </div>
             )}
 
-            <div className="pt-2">
+            <div className="pt-4">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center gap-2 rounded-xl bg-gradient-to-r from-blue-800 via-blue-700 to-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-950/40 focus:outline-none focus-visible:ring-2 ring-white/70 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300"
+                className="w-full flex justify-center items-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 focus:outline-none focus-visible:ring-2 ring-white/70 ring-offset-2 ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               >
                 {loading && <Spinner reduceMotion={reduceMotion} />}
                 {mode === "signup" ? "Create Account" : "Log In"}
@@ -1024,8 +1026,8 @@ export default function Page() {
           </form>
         </div>
 
-        {/* Subtle corner decoration */}
-        <div className="pointer-events-none absolute -inset-px rounded-3xl ring-1 ring-white/30" />
+        {/* Decorative border */}
+        <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/10" />
       </div>
     </main>
   );
@@ -1034,11 +1036,11 @@ export default function Page() {
 /* Tailwind utility builder for inputs (adds error styles conditionally) */
 function inputClass(hasError?: string) {
   return (
-    "w-full rounded-xl bg-white/10 border px-3 py-2 text-sm text-slate-100 placeholder-slate-400 " +
-    "focus:outline-none focus-visible:ring-2 ring-indigo-400 transition-colors " +
+    "w-full rounded-xl bg-white/10 border px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-400 " +
+    "focus:outline-none focus-visible:ring-2 ring-indigo-400 transition-all duration-200 " +
     (hasError
       ? "border-red-400 focus-visible:ring-red-400"
-      : "border-white/20 hover:border-white/40")
+      : "border-white/20 hover:border-white/40 focus:bg-white/[0.15]")
   );
 }
 
